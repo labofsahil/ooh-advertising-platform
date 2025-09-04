@@ -1,5 +1,7 @@
 import { Header, Cookie, APIError, Gateway } from "encore.dev/api";
 import { authHandler } from "encore.dev/auth";
+import { createClerkClient, verifyToken } from "@clerk/backend";
+import { secret } from "encore.dev/config";
 
 interface AuthParams {
   authorization?: Header<"Authorization">;
@@ -12,19 +14,30 @@ export interface AuthData {
   email: string | null;
 }
 
+const clerkSecretKey = secret("ClerkSecretKey");
+const clerkClient = createClerkClient({ secretKey: clerkSecretKey() });
+
 const auth = authHandler<AuthParams, AuthData>(async (data) => {
   const token = data.authorization?.replace("Bearer ", "") ?? data.session?.value;
   if (!token) {
     throw APIError.unauthenticated("missing token");
   }
 
-  // For development, accept any token and return mock user data
-  // In production, you would verify the token with your auth provider
-  return {
-    userID: "mock-user-id",
-    imageUrl: "https://via.placeholder.com/150",
-    email: "user@example.com",
-  };
+  try {
+    // Verify the Clerk token and resolve user information
+    const verified = await verifyToken(token, {
+      secretKey: clerkSecretKey(),
+    });
+
+    const user = await clerkClient.users.getUser(verified.sub);
+    return {
+      userID: user.id,
+      imageUrl: user.imageUrl ?? "",
+      email: user.emailAddresses?.[0]?.emailAddress ?? null,
+    };
+  } catch (err) {
+    throw APIError.unauthenticated("invalid token", err);
+  }
 });
 
 // Configure the API gateway to use the auth handler.

@@ -1,4 +1,5 @@
 import { api, APIError } from "encore.dev/api";
+import { getAuthData } from "~encore/auth";
 import { inventoryDB } from "./db";
 import { CreateInventoryRequest, InventoryListing } from "./types";
 
@@ -6,29 +7,35 @@ import { CreateInventoryRequest, InventoryListing } from "./types";
 export const createInventory = api<CreateInventoryRequest, InventoryListing>(
   { expose: true, method: "POST", path: "/inventory", auth: true },
   async (req) => {
-    // Ensure default organization exists if using organization_id = 1
-    if (req.organization_id === 1) {
-      const defaultOrg = await inventoryDB.queryRow`
-        SELECT id FROM organizations WHERE id = 1
+    const auth = getAuthData()!;
+    const userID = auth.userID;
+
+    // Find or create the user's default organization
+    let org = await inventoryDB.queryRow<{ id: number }>`
+      SELECT id FROM organizations WHERE user_id = ${userID} AND name = 'Default Organization'
+    `;
+
+    if (!org) {
+      const defaultEmail = `contact+${userID}@defaultorg.local`;
+      org = await inventoryDB.queryRow<{ id: number }>`
+        INSERT INTO organizations (name, email, phone, address, user_id)
+        VALUES ('Default Organization', ${defaultEmail}, '+1-555-0123', '123 Main Street, City, State 12345', ${userID})
+        ON CONFLICT (email) DO NOTHING
+        RETURNING id
       `;
-      
-      if (!defaultOrg) {
-        // Create default organization if it doesn't exist
-        await inventoryDB.exec`
-          INSERT INTO organizations (id, name, email, phone, address)
-          VALUES (1, 'Default Organization', 'contact@defaultorg.com', '+1-555-0123', '123 Main Street, City, State 12345')
-          ON CONFLICT (id) DO NOTHING
+      if (!org) {
+        // If a race condition caused the insert to not return a row, select again
+        const existing = await inventoryDB.queryRow<{ id: number }>`
+          SELECT id FROM organizations WHERE user_id = ${userID} AND name = 'Default Organization'
         `;
+        if (existing) {
+          org = existing;
+        }
       }
-    } else {
-      // Verify organization exists for non-default organization IDs
-      const orgExists = await inventoryDB.queryRow`
-        SELECT id FROM organizations WHERE id = ${req.organization_id}
-      `;
-      
-      if (!orgExists) {
-        throw APIError.notFound("Organization not found");
-      }
+    }
+
+    if (!org) {
+      throw APIError.internal("failed to resolve user's default organization");
     }
 
     // Validate visibility score if provided
@@ -45,7 +52,7 @@ export const createInventory = api<CreateInventoryRequest, InventoryListing>(
         available_from, available_until
       )
       VALUES (
-        ${req.organization_id}, ${req.title}, ${req.description || null},
+        ${org.id}, ${req.title}, ${req.description || null},
         ${req.type}, ${req.size}, ${req.location},
         ${req.latitude || null}, ${req.longitude || null},
         ${req.daily_price}, ${req.weekly_price || null}, ${req.monthly_price || null},
@@ -59,7 +66,7 @@ export const createInventory = api<CreateInventoryRequest, InventoryListing>(
     `;
     
     if (!row) {
-      throw new Error("Failed to create inventory listing");
+      throw APIError.internal("Failed to create inventory listing");
     }
     
     return row;

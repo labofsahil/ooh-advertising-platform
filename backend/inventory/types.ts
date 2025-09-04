@@ -48,7 +48,6 @@ export interface CreateOrganizationRequest {
 }
 
 export interface CreateInventoryRequest {
-  organization_id: number;
   title: string;
   description?: string;
   type: AdSpaceType;

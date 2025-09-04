@@ -172,7 +172,6 @@ export default function InventoryForm() {
       });
     } else {
       createMutation.mutate({
-        organization_id: 1, // Default organization ID
         ...baseData,
       });
     }
@@ -281,7 +280,7 @@ export default function InventoryForm() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Location &amp; Geography</CardTitle>
+            <CardTitle>Location & Geography</CardTitle>
             <CardDescription>Where is this advertising space located?</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -427,7 +426,7 @@ export default function InventoryForm() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Audience &amp; Performance</CardTitle>
+            <CardTitle>Audience & Performance</CardTitle>
             <CardDescription>Information about traffic and audience reach</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
