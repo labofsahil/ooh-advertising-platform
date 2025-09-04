@@ -25,8 +25,8 @@ export default function App() {
               <Route path="/inventory/new" element={<InventoryForm />} />
               <Route path="/inventory/:id" element={<InventoryDetails />} />
               <Route path="/inventory/:id/edit" element={<InventoryForm />} />
-              <Route path="/sign-in" element={<SignInPage />} />
-              <Route path="/sign-up" element={<SignUpPage />} />
+              <Route path="/sign-in/*" element={<SignInPage />} />
+              <Route path="/sign-up/*" element={<SignUpPage />} />
             </Routes>
           </Layout>
           <Toaster />
