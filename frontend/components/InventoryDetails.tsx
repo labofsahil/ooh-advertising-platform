@@ -16,6 +16,9 @@ import {
   Users,
   Lightbulb,
   Monitor,
+  Compass,
+  Home,
+  Globe,
 } from "lucide-react";
 import type { AdSpaceStatus } from "~backend/inventory/types";
 import { useBackend } from "../lib/useBackend";
@@ -73,15 +76,21 @@ export default function InventoryDetails() {
 
   const getStatusVariant = (status: AdSpaceStatus) => {
     switch (status) {
-      case "active": return "default";
+      case "available": return "default";
+      case "booked": return "secondary";
+      case "maintenance": return "outline";
       case "inactive": return "secondary";
-      case "pending": return "outline";
       default: return "secondary";
     }
   };
 
   const formatType = (type: string) => {
     return type.replace("_", " ").replace(/\b\w/g, l => l.toUpperCase());
+  };
+
+  const formatDirection = (dir?: string) => {
+    if (!dir) return "";
+    return dir.charAt(0).toUpperCase() + dir.slice(1);
   };
 
   const formatDate = (date: Date | string) => {
@@ -125,7 +134,7 @@ export default function InventoryDetails() {
         </div>
         
         <div className="flex items-center space-x-2">
-          <Badge variant={getStatusVariant(listing.status)} className="text-sm">
+          <Badge variant={getStatusVariant(listing.status)} className="text-sm capitalize">
             {listing.status}
           </Badge>
           <Button variant="outline" asChild>
@@ -196,6 +205,12 @@ export default function InventoryDetails() {
                   <div className="flex items-center space-x-2 text-sm">
                     <Monitor className="h-4 w-4 text-blue-500" />
                     <span>Digital Display</span>
+                  </div>
+                )}
+                {listing.facing_direction && (
+                  <div className="flex items-center space-x-2 text-sm">
+                    <Compass className="h-4 w-4 text-muted-foreground" />
+                    <span>Facing {formatDirection(listing.facing_direction)}</span>
                   </div>
                 )}
               </div>
@@ -300,6 +315,46 @@ export default function InventoryDetails() {
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Monthly Rate</p>
                   <p className="text-xl font-semibold">${listing.monthly_price}</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Home className="h-5 w-5" />
+                <span>Location Details</span>
+              </CardTitle>
+              <CardDescription>Structured address information</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {listing.address && (
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Address</p>
+                  <p className="text-sm">{listing.address}</p>
+                </div>
+              )}
+              {(listing.city || listing.state || listing.postal_code) && (
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">City/State/Postal</p>
+                  <p className="text-sm">
+                    {[listing.city, listing.state, listing.postal_code].filter(Boolean).join(", ")}
+                  </p>
+                </div>
+              )}
+              {listing.country && (
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Country</p>
+                  <p className="text-sm">{listing.country}</p>
+                </div>
+              )}
+              {(listing.city || listing.country) && (
+                <div className="flex items-center text-sm text-muted-foreground">
+                  <Globe className="h-4 w-4 mr-2" />
+                  <span>
+                    {[listing.city, listing.country].filter(Boolean).join(", ")}
+                  </span>
                 </div>
               )}
             </CardContent>

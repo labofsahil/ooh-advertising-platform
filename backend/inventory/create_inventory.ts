@@ -46,20 +46,24 @@ export const createInventory = api<CreateInventoryRequest, InventoryListing>(
     const row = await inventoryDB.queryRow<InventoryListing>`
       INSERT INTO inventory_listings (
         organization_id, title, description, type, size, location,
+        address, city, state, country, postal_code,
         latitude, longitude, daily_price, weekly_price, monthly_price,
         dimensions_width, dimensions_height, illuminated, digital,
-        traffic_count, demographics, visibility_score, image_url,
+        traffic_count, demographics, visibility_score, status, image_url,
+        facing_direction,
         available_from, available_until
       )
       VALUES (
         ${org.id}, ${req.title}, ${req.description || null},
         ${req.type}, ${req.size}, ${req.location},
+        ${req.address || null}, ${req.city || null}, ${req.state || null}, ${req.country || null}, ${req.postal_code || null},
         ${req.latitude || null}, ${req.longitude || null},
         ${req.daily_price}, ${req.weekly_price || null}, ${req.monthly_price || null},
         ${req.dimensions_width || null}, ${req.dimensions_height || null},
         ${req.illuminated}, ${req.digital},
         ${req.traffic_count || null}, ${req.demographics || null},
-        ${req.visibility_score || null}, ${req.image_url || null},
+        ${req.visibility_score || null}, ${req.status || "available"}, ${req.image_url || null},
+        ${req.facing_direction || null},
         ${req.available_from || null}, ${req.available_until || null}
       )
       RETURNING *

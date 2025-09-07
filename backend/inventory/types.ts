@@ -1,6 +1,7 @@
 export type AdSpaceType = "billboard" | "digital_display" | "transit_ad" | "street_furniture" | "airport" | "mall" | "other";
 export type AdSpaceSize = "small" | "medium" | "large" | "extra_large";
-export type AdSpaceStatus = "active" | "inactive" | "pending";
+export type AdSpaceStatus = "available" | "booked" | "maintenance" | "inactive";
+export type FacingDirection = "north" | "south" | "east" | "west" | "multiple";
 
 export interface Organization {
   id: number;
@@ -20,6 +21,11 @@ export interface InventoryListing {
   type: AdSpaceType;
   size: AdSpaceSize;
   location: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  postal_code?: string;
   latitude?: number;
   longitude?: number;
   daily_price: number;
@@ -34,6 +40,7 @@ export interface InventoryListing {
   visibility_score?: number;
   status: AdSpaceStatus;
   image_url?: string;
+  facing_direction?: FacingDirection;
   available_from?: Date;
   available_until?: Date;
   created_at: Date;
@@ -53,6 +60,11 @@ export interface CreateInventoryRequest {
   type: AdSpaceType;
   size: AdSpaceSize;
   location: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  postal_code?: string;
   latitude?: number;
   longitude?: number;
   daily_price: number;
@@ -65,7 +77,9 @@ export interface CreateInventoryRequest {
   traffic_count?: number;
   demographics?: string;
   visibility_score?: number;
+  status?: AdSpaceStatus;
   image_url?: string;
+  facing_direction?: FacingDirection;
   available_from?: Date;
   available_until?: Date;
 }
@@ -77,6 +91,11 @@ export interface UpdateInventoryRequest {
   type?: AdSpaceType;
   size?: AdSpaceSize;
   location?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  postal_code?: string;
   latitude?: number;
   longitude?: number;
   daily_price?: number;
@@ -91,6 +110,7 @@ export interface UpdateInventoryRequest {
   visibility_score?: number;
   status?: AdSpaceStatus;
   image_url?: string;
+  facing_direction?: FacingDirection;
   available_from?: Date;
   available_until?: Date;
 }

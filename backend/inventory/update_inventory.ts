@@ -32,10 +32,13 @@ export const updateInventory = api<UpdateInventoryRequest, InventoryListing>(
     let paramIndex = 1;
 
     const fields: (keyof UpdateInventoryRequest)[] = [
-      "title", "description", "type", "size", "location", "latitude", "longitude",
-      "daily_price", "weekly_price", "monthly_price", "dimensions_width", "dimensions_height",
+      "title", "description", "type", "size", "location",
+      "address", "city", "state", "country", "postal_code",
+      "latitude", "longitude",
+      "daily_price", "weekly_price", "monthly_price",
+      "dimensions_width", "dimensions_height",
       "illuminated", "digital", "traffic_count", "demographics", "visibility_score",
-      "status", "image_url", "available_from", "available_until"
+      "status", "image_url", "facing_direction", "available_from", "available_until"
     ];
 
     for (const field of fields) {

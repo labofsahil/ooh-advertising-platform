@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, Eye, Edit, Plus } from "lucide-react";
+import { Search, MapPin, Eye, Edit, Plus, Home } from "lucide-react";
 import type { AdSpaceType, AdSpaceStatus } from "~backend/inventory/types";
 import { useBackend } from "../lib/useBackend";
 import { useAuth } from "@clerk/clerk-react";
@@ -39,9 +39,10 @@ export default function InventoryList() {
 
   const getStatusVariant = (status: AdSpaceStatus) => {
     switch (status) {
-      case "active": return "default";
+      case "available": return "default";
+      case "booked": return "secondary";
+      case "maintenance": return "outline";
       case "inactive": return "secondary";
-      case "pending": return "outline";
       default: return "secondary";
     }
   };
@@ -113,9 +114,10 @@ export default function InventoryList() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="available">Available</SelectItem>
+                <SelectItem value="booked">Booked</SelectItem>
+                <SelectItem value="maintenance">Maintenance</SelectItem>
                 <SelectItem value="inactive">Inactive</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -157,7 +159,7 @@ export default function InventoryList() {
                   <div className="space-y-4">
                     <div className="flex items-start justify-between">
                       <h3 className="font-semibold text-lg leading-tight">{listing.title}</h3>
-                      <Badge variant={getStatusVariant(listing.status)}>
+                      <Badge variant={getStatusVariant(listing.status)} className="capitalize">
                         {listing.status}
                       </Badge>
                     </div>
@@ -167,6 +169,12 @@ export default function InventoryList() {
                         <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
                         <span className="truncate">{listing.location}</span>
                       </div>
+                      {listing.address && (
+                        <div className="flex items-center text-sm text-muted-foreground">
+                          <Home className="h-4 w-4 mr-1 flex-shrink-0" />
+                          <span className="truncate">{listing.address}</span>
+                        </div>
+                      )}
                       <p className="text-sm text-muted-foreground">
                         {formatType(listing.type)} • {listing.size.replace("_", " ")}
                       </p>

@@ -10,7 +10,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/components/ui/use-toast";
 import { ArrowLeft, Save } from "lucide-react";
-import type { AdSpaceType, AdSpaceSize, CreateInventoryRequest, UpdateInventoryRequest } from "~backend/inventory/types";
+import type {
+  AdSpaceType,
+  AdSpaceSize,
+  CreateInventoryRequest,
+  UpdateInventoryRequest,
+  FacingDirection,
+  AdSpaceStatus,
+} from "~backend/inventory/types";
 import { useBackend } from "../lib/useBackend";
 import { useAuth } from "@clerk/clerk-react";
 
@@ -32,7 +39,13 @@ export default function InventoryForm() {
     description: "",
     type: "billboard" as AdSpaceType,
     size: "medium" as AdSpaceSize,
+    status: "available" as AdSpaceStatus,
     location: "",
+    address: "",
+    city: "",
+    state: "",
+    country: "",
+    postal_code: "",
     latitude: "",
     longitude: "",
     daily_price: "",
@@ -45,6 +58,7 @@ export default function InventoryForm() {
     traffic_count: "",
     demographics: "",
     visibility_score: "",
+    facing_direction: "north" as FacingDirection,
     image_url: "",
     available_from: "",
     available_until: "",
@@ -66,7 +80,13 @@ export default function InventoryForm() {
         description: existingListing.description || "",
         type: existingListing.type,
         size: existingListing.size,
+        status: existingListing.status,
         location: existingListing.location,
+        address: existingListing.address || "",
+        city: existingListing.city || "",
+        state: existingListing.state || "",
+        country: existingListing.country || "",
+        postal_code: existingListing.postal_code || "",
         latitude: existingListing.latitude?.toString() || "",
         longitude: existingListing.longitude?.toString() || "",
         daily_price: existingListing.daily_price.toString(),
@@ -79,6 +99,7 @@ export default function InventoryForm() {
         traffic_count: existingListing.traffic_count?.toString() || "",
         demographics: existingListing.demographics || "",
         visibility_score: existingListing.visibility_score?.toString() || "",
+        facing_direction: existingListing.facing_direction || "north",
         image_url: existingListing.image_url || "",
         available_from: existingListing.available_from ? new Date(existingListing.available_from).toISOString().split('T')[0] : "",
         available_until: existingListing.available_until ? new Date(existingListing.available_until).toISOString().split('T')[0] : "",
@@ -147,7 +168,13 @@ export default function InventoryForm() {
       description: formData.description || undefined,
       type: formData.type,
       size: formData.size,
+      status: formData.status,
       location: formData.location,
+      address: formData.address || undefined,
+      city: formData.city || undefined,
+      state: formData.state || undefined,
+      country: formData.country || undefined,
+      postal_code: formData.postal_code || undefined,
       latitude: formData.latitude ? parseFloat(formData.latitude) : undefined,
       longitude: formData.longitude ? parseFloat(formData.longitude) : undefined,
       daily_price: parseFloat(formData.daily_price),
@@ -160,6 +187,7 @@ export default function InventoryForm() {
       traffic_count: formData.traffic_count ? parseInt(formData.traffic_count) : undefined,
       demographics: formData.demographics || undefined,
       visibility_score: formData.visibility_score ? parseInt(formData.visibility_score) : undefined,
+      facing_direction: formData.facing_direction || undefined,
       image_url: formData.image_url || undefined,
       available_from: formData.available_from ? new Date(formData.available_from) : undefined,
       available_until: formData.available_until ? new Date(formData.available_until) : undefined,
@@ -235,7 +263,7 @@ export default function InventoryForm() {
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="type">Type *</Label>
                 <Select
@@ -274,18 +302,36 @@ export default function InventoryForm() {
                   </SelectContent>
                 </Select>
               </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="status">Status *</Label>
+                <Select
+                  value={formData.status}
+                  onValueChange={(value) => handleInputChange("status", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="available">Available</SelectItem>
+                    <SelectItem value="booked">Booked</SelectItem>
+                    <SelectItem value="maintenance">Maintenance</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Location & Geography</CardTitle>
+            <CardTitle>Location & Address</CardTitle>
             <CardDescription>Where is this advertising space located?</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="location">Location *</Label>
+              <Label htmlFor="location">General Location *</Label>
               <Input
                 id="location"
                 value={formData.location}
@@ -295,7 +341,59 @@ export default function InventoryForm() {
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="address">Street Address</Label>
+              <Input
+                id="address"
+                value={formData.address}
+                onChange={(e) => handleInputChange("address", e.target.value)}
+                placeholder="e.g., 123 Main St"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="city">City</Label>
+                <Input
+                  id="city"
+                  value={formData.city}
+                  onChange={(e) => handleInputChange("city", e.target.value)}
+                  placeholder="Los Angeles"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="state">State/Region</Label>
+                <Input
+                  id="state"
+                  value={formData.state}
+                  onChange={(e) => handleInputChange("state", e.target.value)}
+                  placeholder="CA"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="postal_code">Postal Code</Label>
+                <Input
+                  id="postal_code"
+                  value={formData.postal_code}
+                  onChange={(e) => handleInputChange("postal_code", e.target.value)}
+                  placeholder="90001"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="country">Country</Label>
+                <Input
+                  id="country"
+                  value={formData.country}
+                  onChange={(e) => handleInputChange("country", e.target.value)}
+                  placeholder="United States"
+                />
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="latitude">Latitude</Label>
                 <Input
@@ -402,7 +500,7 @@ export default function InventoryForm() {
               </div>
             </div>
 
-            <div className="flex space-x-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="illuminated"
@@ -419,6 +517,25 @@ export default function InventoryForm() {
                   onCheckedChange={(checked) => handleInputChange("digital", checked as boolean)}
                 />
                 <Label htmlFor="digital">Digital Display</Label>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="facing_direction">Facing Direction</Label>
+                <Select
+                  value={formData.facing_direction}
+                  onValueChange={(value) => handleInputChange("facing_direction", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="north">North</SelectItem>
+                    <SelectItem value="south">South</SelectItem>
+                    <SelectItem value="east">East</SelectItem>
+                    <SelectItem value="west">West</SelectItem>
+                    <SelectItem value="multiple">Multiple</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </CardContent>
@@ -447,8 +564,8 @@ export default function InventoryForm() {
                 <Input
                   id="visibility_score"
                   type="number"
-                  min="1"
-                  max="10"
+                  min={1}
+                  max={10}
                   value={formData.visibility_score}
                   onChange={(e) => handleInputChange("visibility_score", e.target.value)}
                   placeholder="8"

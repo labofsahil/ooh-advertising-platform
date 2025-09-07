@@ -2,13 +2,18 @@ import { api } from "encore.dev/api";
 import { Query } from "encore.dev/api";
 import { getAuthData } from "~encore/auth";
 import { inventoryDB } from "./db";
-import { InventoryListing, AdSpaceType, AdSpaceStatus } from "./types";
+import { InventoryListing, AdSpaceType, AdSpaceStatus, FacingDirection } from "./types";
 
 interface ListInventoryRequest {
   organization_id?: Query<number>;
   type?: Query<AdSpaceType>;
   status?: Query<AdSpaceStatus>;
   location?: Query<string>;
+  city?: Query<string>;
+  state?: Query<string>;
+  country?: Query<string>;
+  postal_code?: Query<string>;
+  facing_direction?: Query<FacingDirection>;
   limit?: Query<number>;
   offset?: Query<number>;
 }
@@ -52,6 +57,31 @@ export const listInventory = api<ListInventoryRequest, ListInventoryResponse>(
     if (req.location !== undefined) {
       whereConditions.push(`il.location ILIKE $${paramIndex++}`);
       params.push(`%${req.location}%`);
+    }
+
+    if (req.city !== undefined) {
+      whereConditions.push(`il.city ILIKE $${paramIndex++}`);
+      params.push(`%${req.city}%`);
+    }
+
+    if (req.state !== undefined) {
+      whereConditions.push(`il.state ILIKE $${paramIndex++}`);
+      params.push(`%${req.state}%`);
+    }
+
+    if (req.country !== undefined) {
+      whereConditions.push(`il.country ILIKE $${paramIndex++}`);
+      params.push(`%${req.country}%`);
+    }
+
+    if (req.postal_code !== undefined) {
+      whereConditions.push(`il.postal_code = $${paramIndex++}`);
+      params.push(req.postal_code);
+    }
+
+    if (req.facing_direction !== undefined) {
+      whereConditions.push(`il.facing_direction = $${paramIndex++}`);
+      params.push(req.facing_direction);
     }
     
     const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';

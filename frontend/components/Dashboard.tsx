@@ -29,7 +29,7 @@ function DashboardContent() {
   const listings = inventoryData?.listings || [];
   const organizations = organizationsData?.organizations || [];
 
-  const activeListings = listings.filter(listing => listing.status === "active").length;
+  const availableListings = listings.filter(listing => listing.status === "available").length;
   const totalValue = listings.reduce((sum, listing) => sum + listing.daily_price, 0);
 
   return (
@@ -58,7 +58,7 @@ function DashboardContent() {
           <CardContent>
             <div className="text-2xl font-bold">{inventoryData?.total || 0}</div>
             <p className="text-xs text-muted-foreground">
-              {activeListings} active listings
+              {availableListings} available listings
             </p>
           </CardContent>
         </Card>

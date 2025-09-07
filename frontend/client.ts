@@ -162,12 +162,17 @@ export namespace inventory {
         public async listInventory(params: RequestType<typeof api_inventory_list_inventory_listInventory>): Promise<ResponseType<typeof api_inventory_list_inventory_listInventory>> {
             // Convert our params into the objects we need for the request
             const query = makeRecord<string, string | string[]>({
-                limit:             params.limit === undefined ? undefined : String(params.limit),
-                location:          params.location,
-                offset:            params.offset === undefined ? undefined : String(params.offset),
-                "organization_id": params["organization_id"] === undefined ? undefined : String(params["organization_id"]),
-                status:            params.status === undefined ? undefined : String(params.status),
-                type:              params.type === undefined ? undefined : String(params.type),
+                city:               params.city,
+                country:            params.country,
+                "facing_direction": params["facing_direction"] === undefined ? undefined : String(params["facing_direction"]),
+                limit:              params.limit === undefined ? undefined : String(params.limit),
+                location:           params.location,
+                offset:             params.offset === undefined ? undefined : String(params.offset),
+                "organization_id":  params["organization_id"] === undefined ? undefined : String(params["organization_id"]),
+                "postal_code":      params["postal_code"],
+                state:              params.state,
+                status:             params.status === undefined ? undefined : String(params.status),
+                type:               params.type === undefined ? undefined : String(params.type),
             })
 
             // Now make the actual call to the API
@@ -190,21 +195,27 @@ export namespace inventory {
         public async updateInventory(params: RequestType<typeof api_inventory_update_inventory_updateInventory>): Promise<ResponseType<typeof api_inventory_update_inventory_updateInventory>> {
             // Construct the body with only the fields which we want encoded within the body (excluding query string or header fields)
             const body: Record<string, any> = {
+                address:             params.address,
                 "available_from":    params["available_from"],
                 "available_until":   params["available_until"],
+                city:                params.city,
+                country:             params.country,
                 "daily_price":       params["daily_price"],
                 demographics:        params.demographics,
                 description:         params.description,
                 digital:             params.digital,
                 "dimensions_height": params["dimensions_height"],
                 "dimensions_width":  params["dimensions_width"],
+                "facing_direction":  params["facing_direction"],
                 illuminated:         params.illuminated,
                 "image_url":         params["image_url"],
                 latitude:            params.latitude,
                 location:            params.location,
                 longitude:           params.longitude,
                 "monthly_price":     params["monthly_price"],
+                "postal_code":       params["postal_code"],
                 size:                params.size,
+                state:               params.state,
                 status:              params.status,
                 title:               params.title,
                 "traffic_count":     params["traffic_count"],
